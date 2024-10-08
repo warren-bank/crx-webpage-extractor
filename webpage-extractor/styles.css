@@ -1,0 +1,87 @@
+body.webpage-extractor,
+body.webpage-extractor * {
+  cursor: crosshair !important;
+}
+
+body.webpage-extractor *:hover {
+  border: 1px solid #f00 !important;
+}
+
+body.webpage-extractor-dialog *.webpage-extractor-dialog-selected {
+  border: 2px solid #f00 !important;
+}
+
+body.webpage-extractor-dialog > div#webpage-extractor-dialog,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index] {
+  margin: 0;
+  padding: 0;
+  color: #000;
+  font-size: 16px;
+  font-family: sans-serif;
+  font-style: normal;
+  text-decoration: none;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index] {
+  list-style: none;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog {
+  position: fixed;
+  z-index: 99999;
+  top: 0;
+  right: 0;
+  border: 2px solid #000;
+  background-color: #fff;
+  width: 40em;
+  height: 40em;
+  max-width: 600px;
+  max-height: 600px;
+  overflow: auto;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index] {
+  cursor: pointer;
+  border: 1px solid #000;
+  padding: 0.25em;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index]:hover,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index].webpage-extractor-dialog-selected {
+  background-color: #eee;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > div#webpage-extractor-dialog-close {
+  cursor: pointer;
+  position: absolute;
+  top: 0.20em;
+  right: 0.25em;
+  width: 1em;
+  height: 1em;
+  line-height: 1em;
+  text-align: center;
+  padding: 2px;
+  border: 1px solid #ccc;
+  background-color: #eee;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > div#webpage-extractor-dialog-actions {
+  display: none;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible {
+  overflow-y: hidden;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > div#webpage-extractor-dialog-actions {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3em;
+  background-color: #222;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > div#webpage-extractor-dialog-actions > button[x-action] {
+  flex-grow: 1;
+  background-color: #eee;
+  color: #222;
+  padding: 1em;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
