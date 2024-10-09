@@ -5,8 +5,6 @@ let active_mode_enabled = false
 
 const css_classname = 'webpage-extractor'
 const use_capture   = true
-const actions       = ['Copy Link URLs', 'Copy Image URLs', 'Copy Text Content', 'Remove Element']
-const action_values = actions.map(action => action.toLowerCase().replace(/ +/g, '-'))
 
 const state = {}
 
@@ -40,6 +38,10 @@ const dedupe_sorted_array = (old_array) => {
   return new_array
 }
 
+const filter_protocol_from_uris_array = (old_array, protocol) => old_array.filter(url => (url.length < protocol.length) || (url.substring(0, protocol.length).toLowerCase() !== protocol))
+
+const filter_data_protocol_from_uris_array = (old_array) => filter_protocol_from_uris_array(old_array, 'data:')
+
 const cancel_event = (event) => {
   event.preventDefault()
   event.stopPropagation()
@@ -50,21 +52,37 @@ const is_dialog_visible         = () => (state.clicked.length > 0)
 const is_dialog_selected        = () => (typeof state.selected === 'number')
 const is_dialog_actions_visible = () => is_dialog_selected()
 
-const get_css_classname                        = (what) => `${css_classname}${what ? `-${what}` : ''}`
-const get_css_classname_root                   = ()     => get_css_classname()
-const get_css_classname_dialog                 = ()     => get_css_classname('dialog')
-const get_css_classname_dialog_close           = ()     => get_css_classname('dialog-close')
-const get_css_classname_dialog_selected        = ()     => get_css_classname('dialog-selected')
-const get_css_classname_dialog_actions         = ()     => get_css_classname('dialog-actions')
-const get_css_classname_dialog_actions_visible = ()     => 'actions-visible'
+const get_css_classname                          = (what) => `${css_classname}${what ? `-${what}` : ''}`
+const get_css_classname_root                     = ()     => get_css_classname()
+const get_css_classname_dialog                   = ()     => get_css_classname('dialog')
+const get_css_classname_dialog_close             = ()     => get_css_classname('dialog-close')
+const get_css_classname_dialog_selected          = ()     => get_css_classname('dialog-selected')
+const get_css_classname_dialog_actions           = ()     => get_css_classname('dialog-actions')
+const get_css_classname_dialog_actions_visible   = ()     => 'actions-visible'
+const get_css_classname_dialog_actions_copy_urls = ()     => ({
+  'container':                 'copy-urls',
+  'select_page_element':       'copy-urls-page-element',
+  'checkbox_sort_and_dedupe':  'copy-urls-sort-and-dedupe',
+  'checkbox_remove_data_uris': 'copy-urls-remove-data-uris'
+})
 
-const get_dialog          = () => document.querySelector(`body.${get_css_classname_dialog()} > div#${get_css_classname_dialog()}`)
-const get_dialog_selected = () => is_dialog_selected() ? state.clicked[state.selected] : null
-const get_dialog_actions  = () => get_dialog().querySelector(`:scope > div#${get_css_classname_dialog_actions()}`)
+const get_dialog                   = () => document.querySelector(`body.${get_css_classname_dialog()} > div#${get_css_classname_dialog()}`)
+const get_dialog_selected          = () => is_dialog_selected() ? state.clicked[state.selected] : null
+const get_dialog_actions           = () => get_dialog().querySelector(`:scope > div#${get_css_classname_dialog_actions()}`)
+const get_dialog_actions_copy_urls = () => {
+  const classnames = get_css_classname_dialog_actions_copy_urls()
+  const elements = {}
+  delete classnames.container
+  for (let key of Object.keys(classnames)) {
+    elements[key] = document.getElementById(classnames[key])
+  }
+  return elements
+}
 
-const is_target_dialog         = (event) => event.target.hasAttribute('x-index')
-const is_target_dialog_close   = (event) => event.target.getAttribute('id') === get_css_classname_dialog_close()
-const is_target_dialog_actions = (event) => event.target.hasAttribute('x-action')
+const is_target_dialog            = (event) => event.target.hasAttribute('x-index')
+const is_target_dialog_close      = (event) => event.target.getAttribute('id') === get_css_classname_dialog_close()
+const is_target_dialog_actions    = (event) => event.target.hasAttribute('x-action')
+const is_target_dialog_descendant = (event) => get_dialog().contains(event.target)
 
 // -----------------------------------------------------------------------------
 // bootstrap:
@@ -107,7 +125,7 @@ const disable_active_mode = () => {
 
 const handle_click_event = (event) => {
   if (is_dialog_visible()) {
-    if (!is_target_dialog(event) && !is_target_dialog_close(event) && !is_target_dialog_actions(event)) {
+    if (!is_target_dialog(event) && !is_target_dialog_descendant(event)) {
       cancel_event(event)
     }
     return
@@ -147,6 +165,7 @@ const handle_keydown_event = (event) => {
 
 const show_dialog = () => {
   document.body.classList.add(get_css_classname_dialog())
+  let classnames
 
   const dialog = document.createElement('div')
   dialog.setAttribute('id', get_css_classname_dialog())
@@ -160,20 +179,29 @@ const show_dialog = () => {
 
   const dialog_actions = document.createElement('div')
   dialog_actions.setAttribute('id', get_css_classname_dialog_actions())
-
-  for (let i=0; i < actions.length; i++) {
-    const action_title = actions[i]
-    const action_value = action_values[i]
-
-    const action_button = document.createElement('button')
-    action_button.setAttribute('x-action', action_value)
-    action_button.appendChild(
-      document.createTextNode(action_title)
-    )
-
-    dialog_actions.appendChild(action_button)
-  }
-
+  classnames = get_css_classname_dialog_actions_copy_urls()
+  dialog_actions.innerHTML = `
+    <div class="${classnames.container}">
+      <div>
+        <label for="${classnames.select_page_element}">Page Element:</label>
+        <select id="${classnames.select_page_element}">
+          <option value="links" selected="selected">Links</option>
+          <option value="images">Images</option>
+          <option value="iframes">IFrames</option>
+          <option value="media-tracks">Media Tracks</option>
+        </select>
+      </div>
+      <div>
+        <input id="${classnames.checkbox_sort_and_dedupe}" type="checkbox" checked="checked" /><label for="${classnames.checkbox_sort_and_dedupe}"> Sort and Remove Duplicates</label>
+      </div>
+      <div>
+        <input id="${classnames.checkbox_remove_data_uris}" type="checkbox" checked="checked" /><label for="${classnames.checkbox_remove_data_uris}"> Remove data: URIs</label>
+      </div>
+      <button x-action="copy-urls">Copy URLs</button>
+    </div>
+    <button x-action="copy-text-content">Copy Text Content</button>
+    <button x-action="remove-element">Remove Element</button>
+`
   dialog_actions.addEventListener('click', handle_dialog_actions_click_event, use_capture)
 
   const list = document.createElement('ul')
@@ -218,69 +246,95 @@ const handle_dialog_actions_click_event = (event) => {
   if (is_target_dialog_actions(event)) {
     cancel_event(event)
 
-    const action_value = event.target.getAttribute('x-action')
-    const action_index = action_values.indexOf(action_value)
+    const action    = event.target.getAttribute('x-action')
+    const $selected = get_dialog_selected()
 
-    if (action_index >= 0) {
-      const $el = get_dialog_selected()
+    switch(action) {
+      case 'copy-urls':
+        {
+          const elements                     = get_dialog_actions_copy_urls()
+          elements.select_page_element       = elements.select_page_element.value
+          elements.checkbox_sort_and_dedupe  = elements.checkbox_sort_and_dedupe.checked
+          elements.checkbox_remove_data_uris = elements.checkbox_remove_data_uris.checked
 
-      switch(action_index) {
-        case 0:  // 'Copy Link URLs'
-          {
-            let urls
-            urls = [...$el.querySelectorAll('a')].map($a => $a.href).filter(url => !!url).sort()
-            urls = dedupe_sorted_array(urls)
-            urls = urls.join("\n")
-            navigator.clipboard.writeText(urls)
+          let urls
+          switch(elements.select_page_element) {
+            case 'links':
+              // a[href], map > area[href]
+              urls = [...$selected.querySelectorAll('a[href], map > area[href]')].map($el => $el.href || $el.getAttribute('href'))
+              break
+            case 'images':
+              // img[src], picture > source[srcset], embed[type^="image/"][src]
+              urls = [...$selected.querySelectorAll('img[src], picture > source[srcset], embed[type^="image/"][src]')].map($el => $el.src || $el.getAttribute('src') || $el.getAttribute('srcset'))
+              break
+            case 'iframes':
+              // iframe[src], embed[type="text/html"][src]
+              urls = [...$selected.querySelectorAll('iframe[src], embed[type="text/html"][src]')].map($el => $el.src || $el.getAttribute('src'))
+              break
+            case 'media-tracks':
+              // audio[src], audio > source[src], audio > track[src], video[src], video > source[src], video > track[src], embed[type^="audio/"][src], embed[type^="video/"][src]
+              urls = [...$selected.querySelectorAll('audio[src], audio > source[src], audio > track[src], video[src], video > source[src], video > track[src], embed[type^="audio/"][src], embed[type^="video/"][src]')].map($el => $el.src || $el.getAttribute('src'))
+              break
           }
-          break
-        case 1:  // 'Copy Image URLs'
-          {
-            let urls
-            urls = [...$el.querySelectorAll('img')].map($img => $img.src).filter(url => !!url).sort()
-            urls = dedupe_sorted_array(urls)
-            urls = urls.join("\n")
-            navigator.clipboard.writeText(urls)
+
+          if (!Array.isArray(urls))
+            urls = []
+
+          if (urls.length)
+            urls = urls.filter(url => !!url)
+
+          if (urls.length && elements.checkbox_sort_and_dedupe)
+            urls = dedupe_sorted_array(urls.sort())
+
+          if (urls.length && elements.checkbox_remove_data_uris)
+            urls = filter_data_protocol_from_uris_array(urls)
+
+          urls = (urls.length)
+            ? urls.join("\n")
+            : 'No matching URLs.'
+
+          navigator.clipboard.writeText(urls)
+        }
+        break
+
+      case 'copy-text-content':
+        {
+          const text = $selected.textContent
+          navigator.clipboard.writeText(text)
+        }
+        break
+
+      case 'remove-element':
+        {
+          // remove selected element and all nested child elements
+
+          const nodes = []
+          let $el
+
+          // include list items in dialog
+          $el = get_dialog().querySelector(`li[x-index="${state.selected}"]`)
+          nodes.push($el)
+          while($el = $el.nextElementSibling) {
+            if (is_target_dialog({target: $el}))
+              nodes.push($el)
+            else
+              break
           }
-          break
-        case 2:  // 'Copy Text Content'
-          {
-            const text = $el.textContent
-            navigator.clipboard.writeText(text)
+
+          // include dom elements
+          for (let i=state.selected; i < state.clicked.length; i++) {
+            nodes.push(state.clicked[i])
           }
-          break
-        case 3:  // 'Remove Element'
-          {
-            // remove selected element and all nested child elements
 
-            const nodes = []
-            let $el
+          remove_dom_elements(nodes)
 
-            // include list items in dialog
-            $el = get_dialog().querySelector(`li[x-index="${state.selected}"]`)
-            nodes.push($el)
-            while($el = $el.nextElementSibling) {
-              if (is_target_dialog({target: $el}))
-                nodes.push($el)
-              else
-                break
-            }
-
-            // include dom elements
-            for (let i=state.selected; i < state.clicked.length; i++) {
-              nodes.push(state.clicked[i])
-            }
-
-            remove_dom_elements(nodes)
-
-            // update state
-            state.clicked = state.clicked.slice(0, state.selected)
-          }
-          break
-      }
-
-      hide_dialog_actions()
+          // update state
+          state.clicked = state.clicked.slice(0, state.selected)
+        }
+        break
     }
+
+    hide_dialog_actions()
   }
 }
 
@@ -344,28 +398,42 @@ const hide_dialog = () => {
 // dialog actions UI:
 
 const show_dialog_actions = () => {
+  const dialog          = get_dialog()
+  const dialog_selected = get_dialog_selected()
+  const dialog_actions  = get_dialog_actions()
+
   // add highlight to selected item in list
-  get_dialog().querySelector(`li[x-index="${state.selected}"]`).classList.add(get_css_classname_dialog_selected())
+  dialog.querySelector(`li[x-index="${state.selected}"]`).classList.add(get_css_classname_dialog_selected())
 
   // add highlight to selected item in DOM
-  get_dialog_selected().classList.add(get_css_classname_dialog_selected())
+  dialog_selected.classList.add(get_css_classname_dialog_selected())
 
   // show actions
-  get_dialog().classList.add(get_css_classname_dialog_actions_visible())
+  dialog.classList.add(get_css_classname_dialog_actions_visible())
+
+  // set position
+  dialog_actions.style.top = (dialog.scrollTop + dialog.clientHeight - dialog_actions.clientHeight) + 'px'
 }
 
 const hide_dialog_actions = () => {
+  const dialog          = get_dialog()
+  const dialog_selected = get_dialog_selected()
+  const dialog_actions  = get_dialog_actions()
+
   // check that selected item was not removed
   if (state.selected < state.clicked.length) {
     // remove highlight from selected item in list
-    get_dialog().querySelector(`li[x-index="${state.selected}"]`).classList.remove(get_css_classname_dialog_selected())
+    dialog.querySelector(`li[x-index="${state.selected}"]`).classList.remove(get_css_classname_dialog_selected())
 
     // remove highlight from selected item in DOM
-    get_dialog_selected().classList.remove(get_css_classname_dialog_selected())
+    dialog_selected.classList.remove(get_css_classname_dialog_selected())
   }
 
   // hide actions
-  get_dialog().classList.remove(get_css_classname_dialog_actions_visible())
+  dialog.classList.remove(get_css_classname_dialog_actions_visible())
+
+  // reset position
+  dialog_actions.style.top = '0px'
 
   // update state
   state.selected = null
