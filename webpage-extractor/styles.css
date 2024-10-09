@@ -1,3 +1,9 @@
+/*
+ * =========
+ * required:
+ * =========
+ */
+
 body.webpage-extractor,
 body.webpage-extractor * {
   cursor: crosshair !important;
@@ -51,7 +57,7 @@ body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index].
 body.webpage-extractor-dialog > div#webpage-extractor-dialog > div#webpage-extractor-dialog-close {
   cursor: pointer;
   position: absolute;
-  top: 0.20em;
+  top: calc(0.25em - 2px);
   right: 0.25em;
   width: 1em;
   height: 1em;
@@ -84,4 +90,27 @@ body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > d
   padding: 1em;
   font-size: 0.85em;
   white-space: nowrap;
+}
+
+/*
+ * ======
+ * reset:
+ * ======
+ */
+
+body.webpage-extractor-dialog > div#webpage-extractor-dialog,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > ul > li[x-index],
+body.webpage-extractor-dialog > div#webpage-extractor-dialog > div#webpage-extractor-dialog-close,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > div#webpage-extractor-dialog-actions,
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > div#webpage-extractor-dialog-actions > button[x-action] {
+  box-sizing: content-box;
+  line-height: 1em;
+}
+body.webpage-extractor-dialog > div#webpage-extractor-dialog.actions-visible > div#webpage-extractor-dialog-actions > button[x-action] {
+  height: unset;
+  margin: unset;
+  font-family: unset;
+  border: 2px outset #000;
+  border-radius: 0;
 }
