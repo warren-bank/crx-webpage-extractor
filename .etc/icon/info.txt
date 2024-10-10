@@ -1,7 +1,7 @@
-https://openclipart.org/detail/159529/coal-barrow-color
-https://openclipart.org/download/159529
-https://openclipart.org/artist/nbcorp
-  author:  NB Corp.
+https://openclipart.org/detail/194776/cartoon-pig
+https://openclipart.org/download/194776
+https://openclipart.org/artist/dear_theophilus
+  author:  Sarah Owens
   license: public domain
 
 https://cloudconvert.com/svg-to-png

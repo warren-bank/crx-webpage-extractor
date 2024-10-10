@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Webpage Extractor",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Extract information from selected visible elements from the current webpage.",
   "icons": {
     "16":  "icon/icon_16.png",
