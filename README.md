@@ -14,8 +14,14 @@ WebExtension to extract information from selected visible elements from the curr
     * when any representation of a DOM element in this list is clicked:
       - a context menu is displayed
       - the buttons in this context menu represent various actions that can be performed on the selected DOM element:
-        * Copy Link URLs
-        * Copy Image URLs
+        * Copy URLs
+          - [select] Page Element:
+            * Links
+            * Images
+            * IFrames
+            * Media Tracks
+          - [checkbox] Sort and Remove Duplicates
+          - [checkbox] Remove _data:_ URIs
         * Copy Text Content
         * Remove Element
     * the modal dialog can be closed in any of the following ways:
