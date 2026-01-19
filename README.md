@@ -17,9 +17,32 @@ WebExtension to extract information from selected visible elements from the curr
         * Copy URLs
           - [select] Page Element:
             * Links
+              - in elements:
+                * `a`
+                * `map > area`
+              - w/ attributes: `href`
             * Images
+              - in elements:
+                * `img`
+                * `picture > source`
+                * `embed[type^="image/"]`
+              - w/ attributes: `src` or `srcset`
             * IFrames
+              - in elements:
+                * `iframe`
+                * `embed[type="text/html"]`
+              - w/ attributes: `src`
             * Media Tracks
+              - in elements:
+                * `audio|video`
+                * `audio|video > source`
+                * `audio|video > track`
+                * `embed[type^="audio|video/"]`
+              - w/ attributes: `src`
+            * Any
+              - in elements: _any_
+              - w/ attributes: _any_
+                * having a value that begins with the case-insensitive substring: `http`
           - [checkbox] Sort and Remove Duplicates
           - [checkbox] Remove _data:_ URIs
         * Copy Text Content

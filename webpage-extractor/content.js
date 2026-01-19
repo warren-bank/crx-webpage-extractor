@@ -189,6 +189,7 @@ const show_dialog = () => {
           <option value="images">Images</option>
           <option value="iframes">IFrames</option>
           <option value="media-tracks">Media Tracks</option>
+          <option value="any">Any</option>
         </select>
       </div>
       <div>
@@ -275,6 +276,10 @@ const handle_dialog_actions_click_event = (event) => {
               // audio[src], audio > source[src], audio > track[src], video[src], video > source[src], video > track[src], embed[type^="audio/"][src], embed[type^="video/"][src]
               urls = [...$selected.querySelectorAll('audio[src], audio > source[src], audio > track[src], video[src], video > source[src], video > track[src], embed[type^="audio/"][src], embed[type^="video/"][src]')].map($el => $el.src || $el.getAttribute('src'))
               break
+            case 'any':
+              // *[*^="http"]
+              urls = get_urls_from_any_element_in_selected_container($selected)
+              break
           }
 
           if (!Array.isArray(urls))
@@ -336,6 +341,21 @@ const handle_dialog_actions_click_event = (event) => {
 
     hide_dialog_actions()
   }
+}
+
+const get_urls_from_any_element_in_selected_container = ($selected) => {
+  const urls = []
+  const allElements = $selected.getElementsByTagName('*')
+
+  for (const element of allElements) {
+    for (const attr of element.attributes) {
+      if (attr.value.toLowerCase().startsWith('http')) {
+        urls.push(attr.value)
+      }
+    }
+  }
+
+  return urls
 }
 
 const handle_dialog_mouseenter_event = (event) => {
