@@ -1,0 +1,20 @@
+<html>
+<head>
+<script>
+  window.exports = {}
+</script> 
+<script src="https://unpkg.com/turndown@7.2.4/dist/turndown.js"></script>
+<script src="https://unpkg.com/@joplin/turndown-plugin-gfm@1.0.64/lib/turndown-plugin-gfm.cjs.js"></script>
+<script>
+  var gfm = exports.gfm
+  var turndownService = new TurndownService()
+  turndownService.use(gfm)
+</script>
+</head>
+<body>
+  <pre></pre>
+</body>
+<script>
+  document.querySelector('pre').textContent = turndownService.turndown('<strike>Hello world!</strike>')
+</script>
+</html>

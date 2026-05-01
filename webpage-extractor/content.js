@@ -201,6 +201,7 @@ const show_dialog = () => {
       <button x-action="copy-urls">Copy URLs</button>
     </div>
     <button x-action="copy-text-content">Copy Text Content</button>
+    <button x-action="copy-markdown">Copy Markdown</button>
     <button x-action="remove-element">Remove Element</button>
 `
   dialog_actions.addEventListener('click', handle_dialog_actions_click_event, use_capture)
@@ -306,6 +307,13 @@ const handle_dialog_actions_click_event = (event) => {
         {
           const text = $selected.textContent
           navigator.clipboard.writeText(text)
+        }
+        break
+
+      case 'copy-markdown':
+        {
+          const markdown = window.getMarkdown($selected)
+          navigator.clipboard.writeText(markdown)
         }
         break
 
