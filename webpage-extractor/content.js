@@ -60,10 +60,11 @@ const get_css_classname_dialog_selected          = ()     => get_css_classname('
 const get_css_classname_dialog_actions           = ()     => get_css_classname('dialog-actions')
 const get_css_classname_dialog_actions_visible   = ()     => 'actions-visible'
 const get_css_classname_dialog_actions_copy_urls = ()     => ({
-  'container':                 'copy-urls',
+  'container_copy_urls':       'copy-urls-container',
   'select_page_element':       'copy-urls-page-element',
   'checkbox_sort_and_dedupe':  'copy-urls-sort-and-dedupe',
-  'checkbox_remove_data_uris': 'copy-urls-remove-data-uris'
+  'checkbox_remove_data_uris': 'copy-urls-remove-data-uris',
+  'container_buttons':         'buttons-container'
 })
 
 const get_dialog                   = () => document.querySelector(`body.${get_css_classname_dialog()} > div#${get_css_classname_dialog()}`)
@@ -72,7 +73,8 @@ const get_dialog_actions           = () => get_dialog().querySelector(`:scope > 
 const get_dialog_actions_copy_urls = () => {
   const classnames = get_css_classname_dialog_actions_copy_urls()
   const elements = {}
-  delete classnames.container
+  delete classnames.container_copy_urls
+  delete classnames.container_buttons
   for (let key of Object.keys(classnames)) {
     elements[key] = document.getElementById(classnames[key])
   }
@@ -181,7 +183,7 @@ const show_dialog = () => {
   dialog_actions.setAttribute('id', get_css_classname_dialog_actions())
   classnames = get_css_classname_dialog_actions_copy_urls()
   dialog_actions.innerHTML = `
-    <div class="${classnames.container}">
+    <div class="${classnames.container_copy_urls}">
       <div>
         <label for="${classnames.select_page_element}">Page Element:</label>
         <select id="${classnames.select_page_element}">
@@ -198,11 +200,13 @@ const show_dialog = () => {
       <div>
         <input id="${classnames.checkbox_remove_data_uris}" type="checkbox" checked="checked" /><label for="${classnames.checkbox_remove_data_uris}"> Remove data: URIs</label>
       </div>
-      <button x-action="copy-urls">Copy URLs</button>
     </div>
-    <button x-action="copy-text-content">Copy Text Content</button>
-    <button x-action="copy-markdown">Copy Markdown</button>
-    <button x-action="remove-element">Remove Element</button>
+    <div class="${classnames.container_buttons}">
+      <button x-action="copy-urls">Copy URLs</button>
+      <button x-action="copy-text-content">Copy Text Content</button>
+      <button x-action="copy-markdown">Copy Markdown</button>
+      <button x-action="remove-element">Remove Element</button>
+    </div>
 `
   dialog_actions.addEventListener('click', handle_dialog_actions_click_event, use_capture)
 
